@@ -1,16 +1,16 @@
 import datetime as _dt
 import pydantic as _pydantic
 
-class userBase(_pydantic.BaseModel):
+class _userBase(_pydantic.BaseModel):
     email: str
 
-class userCreate(userBase):
-    hashed_password =True
+class userCreate(_userBase):
+    hashed_password : str
 
     class Config:
         orm_mode = True
 
-class User(userBase):
+class User(_userBase):
     id: int
 
     class Config:
