@@ -1,23 +1,38 @@
-from typing import Annotated
-from fastapi import Depends, FastAPI
-from fastapi.security import OAuth2PasswordBearer
+from typing import Union
+import fastapi as _fastapi
+import fastapi.security as _security
 
 import sqlalchemy.orm as _orm
 import services as _services
 import schemes as _schemes
 
-app = FastAPI()
+app = _fastapi.FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-@app.get("/items/")
-async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": token}
 
 @app.post("/api/users")
 async def create_user(
-    user: _schemes.UserCreate, db: _orm.Session = FastAPI.Depends(_services.get_db)
+    user: _schemes.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
-    user = await _services.creare_user(user, db)
-    return await user
+    db_user = await _services.get_user_by_email(user.email, db)
+    if db_user:
+        raise _fastapi.HTTPException(status_code=400, detail="Email already in use")
+
+    user = await _services.create_user(user, db)
+
+    return await _services.create_token(user)
+
+@app.post("/api/token")
+async def generate_token(
+    form_data: _security.OAuth2PasswordRequestForm = _fastapi.Depends(),
+    db: _orm.Session = _fastapi.Depends(_services.get_db),
+):
+    user = await _services.authenticate_user(form_data.username, form_data.password, db)
+ 
+    if not user:
+        raise _fastapi.HTTPException(status_code=401, detail="Invalid Credentials")
+ 
+    return await _services.create_token(user)
+    
+@app.get("/api/users/myprofile", response_model=_schemes.User)
+async def get_user(user: _schemes.User = _fastapi.Depends(_services.get_current_user)):
+    return user

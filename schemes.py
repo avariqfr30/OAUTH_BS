@@ -1,5 +1,5 @@
 import datetime as _dt
-
+import pydantic as _pydantic
 
 class userBase(_pydantic.Basemodel):
     email: str
