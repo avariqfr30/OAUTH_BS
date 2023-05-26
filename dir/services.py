@@ -4,7 +4,7 @@ import jwt as _jwt
 import sqlalchemy.orm as _orm
 import passlib.hash as _hash
 
-import database as _database, models as _models, schemes as _schemes
+import database as _database, models as _models, schemas as _schemes
 
 oauth2scheme = _security.OAuth2PasswordBearer(tokenUrl="/api/token")
 

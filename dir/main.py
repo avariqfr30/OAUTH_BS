@@ -4,14 +4,14 @@ import fastapi.security as _security
 
 import sqlalchemy.orm as _orm
 import services as _services
-import schemes as _schemes
+import schemas as _schemas
 
 app = _fastapi.FastAPI()
 
 
 @app.post("/api/users")
 async def create_user(
-    user: _schemes.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)
+    user: _schemas.userCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)
 ):
     db_user = await _services.get_user_by_email(user.email, db)
     if db_user:
@@ -33,6 +33,6 @@ async def generate_token(
  
     return await _services.create_token(user)
     
-@app.get("/api/users/myprofile", response_model=_schemes.User)
-async def get_user(user: _schemes.User = _fastapi.Depends(_services.get_current_user)):
+@app.get("/api/users/myprofile", response_model=_schemas.User)
+async def get_user(user: _schemas.User = _fastapi.Depends(_services.get_current_user)):
     return user
